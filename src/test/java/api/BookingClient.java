@@ -1,9 +1,9 @@
 package api;
 
 import io.restassured.RestAssured;
-import io.restassured.response.Response;
+import io.restassured.http.ContentType;
 import utils.Configuration;
-import utils.models.BookingResponse;
+import utils.models.*;
 
 import static io.restassured.RestAssured.*;
 
@@ -11,41 +11,99 @@ public class BookingClient {
 
     private String baseUrl = Configuration.get("base.url");
 
-    public Response createBooking(String body) {
+    public BookingResponseWrapper createBooking(BookingRequest request)
+    {
         return given()
                 .baseUri(baseUrl)
                 .basePath("/booking")
                 .header("Content-Type", "application/json")
-                .body(body)
-                .post();
+                .body(request)
+                .when()
+                .post()
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(BookingResponseWrapper.class);
     }
 
-    public BookingResponse getBooking(int bookingId) {
-        return given()
+    public BookingGetResponse getBooking(int bookingId) {
+        var response = given()
                 .baseUri(baseUrl)
                 .when()
                 .get("/booking/" + bookingId)
                 .then()
+                .extract()
+                .response();
+
+        int statusCode = response.statusCode();
+
+        if (statusCode == 200) {
+            return response.as(BookingGetResponse.class);
+        } else if (statusCode == 404) {
+            return null;
+        } else {
+            throw new RuntimeException("Internal server error: " + statusCode);
+        }
+    }
+
+    public BookingGetResponse updateBooking(int bookingId, BookingRequest request, String token) {
+        return RestAssured
+                .given()
+                .baseUri(baseUrl)
+                .basePath("/booking/" + bookingId)
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .body(request)
+                .when()
+                .put()
+                .then()
                 .statusCode(200)
                 .extract()
-                .as(BookingResponse.class); // <-- automatic deserialization
+                .as(BookingGetResponse.class);
     }
 
-    public Response updateBooking(int id, String body, String token) {
-        return given()
+    public AuthResponse generateToken(AuthRequest request) {
+        return RestAssured
+                .given()
                 .baseUri(baseUrl)
-                .basePath("/booking/" + id)
-                .header("Content-Type", "application/json")
-                .header("Cookie", "token=" + token)
-                .body(body)
-                .put();
+                .basePath("/auth")
+                .contentType(ContentType.JSON)
+                .body(request)
+                .when()
+                .post()
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(AuthResponse.class);
     }
 
-    public Response deleteBooking(int id, String token) {
-        return given()
+    public BookingGetResponse patchBooking(int bookingId, BookingPatchRequest request, String token)
+    {
+        return RestAssured
+                .given()
                 .baseUri(baseUrl)
-                .basePath("/booking/" + id)
-                .header("Cookie", "token=" + token)
-                .delete();
+                .basePath("/booking/" + bookingId)
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .body(request)
+                .when()
+                .patch()
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(BookingGetResponse.class);
+    }
+
+    public void deleteBooking(int bookingId, String token) {
+        RestAssured
+                .given()
+                .baseUri(baseUrl)
+                .basePath("/booking/" + bookingId)
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .when()
+                .delete()
+                .then()
+                .statusCode(201);
     }
 }

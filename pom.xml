@@ -55,6 +55,14 @@
             <version>7.14.0</version> <!-- Use the same version as other cucumber dependencies -->
             <scope>test</scope>
         </dependency>
-    </dependencies>
 
+        <dependency>
+            <groupId>tech.grasshopper</groupId>
+            <artifactId>extentreports-cucumber7-adapter</artifactId>
+            <version>1.14.0</version>
+            <scope>test</scope>
+        </dependency>
+
+
+    </dependencies>
 </project>

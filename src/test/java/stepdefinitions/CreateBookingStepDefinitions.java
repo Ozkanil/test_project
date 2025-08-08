@@ -3,13 +3,13 @@ package stepdefinitions;
 import api.BookingClient;
 import contexts.BookingContext;
 import io.cucumber.core.internal.com.fasterxml.jackson.core.JsonProcessingException;
-import io.cucumber.core.internal.com.fasterxml.jackson.databind.ObjectMapper;
+import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import io.restassured.response.Response;
-import utils.TestDataReader;
+import utils.helpers.Helpers;
 import utils.models.BookingRequest;
-import utils.models.BookingResponse;
+import utils.models.BookingGetResponse;
+import utils.models.BookingResponseWrapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -21,28 +21,31 @@ public class CreateBookingStepDefinitions {
     public CreateBookingStepDefinitions(BookingContext context) {
         this.context = context;
     }
-
+    @Given("an existing booking")
     @When("a user requests a new booking")
     public void AUserRequestsANewBooking() throws JsonProcessingException
     {
-        BookingRequest request = TestDataReader.getBookingRequest("src/test/resources/data/BookingRequest.json");
+        BookingRequest request = Helpers.GetBookingRequest();
         // save request data to the context to use in verification step
         context.setRequest(request);
 
-        ObjectMapper mapper = new ObjectMapper();
-        String requestBody = mapper.writeValueAsString(request);
+        BookingResponseWrapper response = bookingClient.createBooking(request);
+        context.setBookingId(response.getBookingid());
 
-        Response response = bookingClient.createBooking(requestBody);
-        context.setBookingId(response.jsonPath().getInt("bookingid"));
-
-        System.out.println("Booking ID: " + response.jsonPath().getInt("bookingid"));
+        //Fetch booking from DB to compare with the test data in the post request
+        BookingGetResponse booking = bookingClient.getBooking(response.getBookingid());
+        context.setGetResponse(booking);
     }
 
+    @Then("the booking is fetched successfully")
     @Then("the booking request is saved successfully")
     public void theBookingRequestIsSavedSuccessfully()
     {
-        BookingResponse response = bookingClient.getBooking(context.getBookingId());
-
-        assertEquals(context.getRequest().firstname, response.getFirstname(), "The customer name is different from expected!");
+        assertEquals(context.getRequest().getFirstname(), context.getGetResponse().getFirstname(), "The customer name is different from expected!");
+        assertEquals(context.getRequest().getLastname(), context.getGetResponse().getLastname(), "The customer surname is different from expected!");
+        assertEquals(context.getRequest().getTotalprice(), context.getGetResponse().getTotalprice(), "The total price is different from expected!");
+        assertEquals(context.getRequest().getBookingdates().getCheckin(), context.getGetResponse().getBookingdates().getCheckin(), "The checkin date is different from expected!");
+        assertEquals(context.getRequest().getBookingdates().getCheckout(), context.getGetResponse().getBookingdates().getCheckout(), "The checkout date is different from expected!");
+        assertEquals(context.getRequest().getAdditionalneeds(), context.getGetResponse().getAdditionalneeds(), "The additional needs are different from expected!");
     }
 }

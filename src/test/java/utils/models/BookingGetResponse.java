@@ -1,6 +1,7 @@
 package utils.models;
 
-public class BookingResponse {
+public class BookingGetResponse
+{
     private String firstname;
     private String lastname;
     private int totalprice;
