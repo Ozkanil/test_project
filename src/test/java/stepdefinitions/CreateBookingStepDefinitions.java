@@ -15,11 +15,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CreateBookingStepDefinitions {
 
-    private final BookingClient bookingClient = new BookingClient();
+    private final BookingClient bookingClient;
     private final BookingContext context;
 
-    public CreateBookingStepDefinitions(BookingContext context) {
+    public CreateBookingStepDefinitions(BookingContext context, BookingClient bookingClient)
+    {
         this.context = context;
+        this.bookingClient = bookingClient;
     }
     @Given("an existing booking")
     @When("a user requests a new booking")

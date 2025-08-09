@@ -9,10 +9,8 @@ import org.junit.runner.RunWith;
         plugin = {
                 "pretty",
                 "html:target/cucumber-html-report",
-                "json:target/cucumber.json",
                 "com.aventstack.extentreports.cucumber.adapter.ExtentCucumberAdapter:"
-        },
-        monochrome = true
+        }
 )
 
 public class TestRunner {

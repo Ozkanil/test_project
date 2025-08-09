@@ -4,6 +4,9 @@ import io.restassured.response.Response;
 import utils.models.BookingGetResponse;
 import utils.models.BookingPatchRequest;
 import utils.models.BookingRequest;
+import utils.models.BookingsResponse;
+
+import java.util.List;
 
 public class BookingContext
 {
@@ -14,6 +17,15 @@ public class BookingContext
     private BookingGetResponse getResponse;
     private String authToken;
     private BookingPatchRequest bookingPatchRequest;
+    List<BookingsResponse> bookings;
+
+    public List<BookingsResponse> getBookings() {
+        return bookings;
+    }
+
+    public void setBookings(List<BookingsResponse> bookings) {
+        this.bookings = bookings;
+    }
 
     public BookingPatchRequest getBookingPatchRequest() {
         return bookingPatchRequest;

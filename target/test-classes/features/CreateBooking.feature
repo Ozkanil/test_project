@@ -1,7 +1,7 @@
 Feature:Create booking
 # Normally, we should test this with some negative scenarios but since
 # this is a simple playground API we cannot have negative scenarios.
-# For example, when you set checkout date to a date earlier than the checking date
+# For example, when you set checkout date to a date earlier than the checkin date
 # the endpoint should return error but it is still creating the booking.
 
   @Booking

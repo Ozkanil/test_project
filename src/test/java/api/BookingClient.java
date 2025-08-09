@@ -5,6 +5,9 @@ import io.restassured.http.ContentType;
 import utils.Configuration;
 import utils.models.*;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static io.restassured.RestAssured.*;
 
 public class BookingClient {
@@ -44,6 +47,20 @@ public class BookingClient {
         } else {
             throw new RuntimeException("Internal server error: " + statusCode);
         }
+    }
+
+    public List<BookingsResponse> getAllBookings() {
+        BookingsResponse[] bookings = RestAssured.given()
+                .baseUri(baseUrl)
+                .contentType(ContentType.JSON)
+                .when()
+                .get("/booking")
+                .then()
+                .statusCode(200)
+                .extract()
+                .as(BookingsResponse[].class);
+
+        return Arrays.asList(bookings);
     }
 
     public BookingGetResponse updateBooking(int bookingId, BookingRequest request, String token) {
